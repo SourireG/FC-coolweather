@@ -104,8 +104,11 @@ public class ChooseAreaFragment extends Fragment {
 
 //    查询全国所有的省，优先从数据库中查询，如果没有则去服务器上查询
     private void queryProvinces(){
+        //设置标题
         titleText.setText("中国");
+        //隐藏返回按钮
         backButton.setVisibility(View.GONE);
+        //调用LitePal的查询接口来从数据库中读取省级数据
         provinceList = DataSupport.findAll(Province.class);
         if (provinceList.size()>0) {
             dataList.clear();
@@ -122,7 +125,7 @@ public class ChooseAreaFragment extends Fragment {
         }
 
     }
-
+//查询市
     private void queryCities() {
         titleText.setText(selectedProvince.getProvinceName());
         backButton.setVisibility(View.VISIBLE);
@@ -143,9 +146,26 @@ public class ChooseAreaFragment extends Fragment {
         }
 
     }
-
+//查询县
     private void queryCounties(){
-
+           titleText.setText(selectedCity.getCityName());
+           backButton.setVisibility(View.VISIBLE);
+           countyList = DataSupport.where("cityid=?",String.valueOf(selectedCity.getId())).find(County.class);
+                if (countyList.size()>0){
+                    dataList.clear();
+                    for (County county: countyList
+                         ) {
+                        dataList.add(county.getCountyName());
+                    }
+                    adapter.notifyDataSetChanged();
+                    listView.setSelection(0);
+                    currentLevel=LEVEL_COUNTY;
+                }else {
+                    int provinceCode = selectedProvince.getProvinceCode();
+                    int cityCode = selectedCity.getCityCode();
+                    String address = "http://guolin.tech/api/china/"+provinceCode+"/"+cityCode;
+                    queryFromServer(address,"county");
+                }
     }
 
 //    根据传入的地址和类型从服务器上查询省市县数据
