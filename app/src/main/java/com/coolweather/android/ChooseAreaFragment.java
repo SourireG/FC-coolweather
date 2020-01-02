@@ -80,9 +80,6 @@ public class ChooseAreaFragment extends Fragment {
                 if (currentLevel == LEVEL_PROVINCE) {
                     selectedProvince = provinceList.get(position);
                     queryCities();
-                } else if (currentLevel == LEVEL_PROVINCE) {
-                    selectedCity = cityList.get(position);
-                    queryCounties();
                 } else if (currentLevel == LEVEL_CITY) {
                     selectedCity = cityList.get(position);
                     queryCounties();
@@ -99,6 +96,7 @@ public class ChooseAreaFragment extends Fragment {
                 }
             }
         });
+        queryProvinces();
     }
 
 
@@ -110,8 +108,11 @@ public class ChooseAreaFragment extends Fragment {
         backButton.setVisibility(View.GONE);
         //调用LitePal的查询接口来从数据库中读取省级数据
         provinceList = DataSupport.findAll(Province.class);
+        //Judge whether provincial information exists in local database
         if (provinceList.size()>0) {
+            //clear data on adapter
             dataList.clear();
+            //add province name on adapter
             for (Province province:provinceList
                  ) {
                 dataList.add(province.getProvinceName());
