@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -24,6 +25,7 @@ import okhttp3.Callback;
 import okhttp3.Response;
 
 public class WeatherActivity extends AppCompatActivity {
+    private static final String TAG = "sad";
     private ScrollView weatherLayout;
 
     private TextView titleCity;
@@ -59,10 +61,16 @@ public class WeatherActivity extends AppCompatActivity {
         sportText=findViewById(R.id.sport_text);
         SharedPreferences prefs=PreferenceManager.getDefaultSharedPreferences(this);
         String weatherString = prefs.getString("weather",null);
+
+        final String weatherId;
+
         if (weatherString!=null){
             Weather weather =Utility.handleWeatherResponse(weatherString);
+            weatherId=weather.basic.weatherId;
+            showWeatherInfo(weather);
+            Log.d(TAG, "create");
         }else {
-            String weatherId = getIntent().getStringExtra("weather_id");
+            weatherId = getIntent().getStringExtra("weather_id");
             weatherLayout.setVisibility(View.INVISIBLE);
             requestWeather(weatherId);
         }
@@ -70,8 +78,8 @@ public class WeatherActivity extends AppCompatActivity {
 
 
     //    根据天气ID请求城市天气信息
-    public void requestWeather(final String weatherId) {
-        String weatherUrl = "https://api.heweather.net/s6/weather?location=" + weatherId + "&key=102ab3537af44eb8ab9b2d7646f90c00";
+    public void requestWeather(final String weatherId){
+        String weatherUrl="http://guolin.tech/api/weather?cityid="+weatherId+"&key=a3a928f078314931b6d212e75f4a1dfb";
         HttpUtil.sendOkHttpRequest(weatherUrl, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -79,32 +87,30 @@ public class WeatherActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Toast.makeText(WeatherActivity.this, "获取天气信息失败", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(WeatherActivity.this,"获取天气信息失败",Toast.LENGTH_SHORT).show();
                     }
                 });
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                final String responseText = response.body().string();
-                final Weather weather = Utility.handleWeatherResponse(responseText);
+                final String responseText=response.body().string();
+                final Weather weather=Utility.handleWeatherResponse(responseText);
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        if (weather != null && "ok".equals(weather.status)) {
-                            SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(WeatherActivity.this).edit();
-                            editor.putString("weather", responseText);
+                        if(weather!=null && "ok".equals(weather.status)){
+                            SharedPreferences.Editor editor=PreferenceManager.getDefaultSharedPreferences(WeatherActivity.this).edit();
+                            editor.putString("weather",responseText);
                             editor.apply();
                             showWeatherInfo(weather);
-                        } else {
-                            Toast.makeText(WeatherActivity.this, "获取天气信息失败", Toast.LENGTH_SHORT).show();
+                        }else {
+                            Toast.makeText(WeatherActivity.this,"获取天气信息失败",Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
             }
         });
-
-
     }
 
 

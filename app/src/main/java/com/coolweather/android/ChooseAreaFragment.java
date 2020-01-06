@@ -23,7 +23,8 @@ import com.coolweather.android.db.Province;
 import com.coolweather.android.util.HttpUtil;
 import com.coolweather.android.util.Utility;
 
-import org.litepal.crud.DataSupport;
+import org.litepal.LitePal;
+import org.litepal.crud.LitePalSupport;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -114,7 +115,7 @@ public class ChooseAreaFragment extends Fragment {
         //隐藏返回按钮
         backButton.setVisibility(View.GONE);
         //调用LitePal的查询接口来从数据库中读取省级数据
-        provinceList = DataSupport.findAll(Province.class);
+        provinceList = LitePal.findAll(Province.class);
         //Judge whether provincial information exists in local database
         if (provinceList.size()>0) {
             //clear data on adapter
@@ -137,7 +138,7 @@ public class ChooseAreaFragment extends Fragment {
     private void queryCities() {
         titleText.setText(selectedProvince.getProvinceName());
         backButton.setVisibility(View.VISIBLE);
-        cityList = DataSupport.where("provinceid=?",String.valueOf(selectedProvince.getId())).find(City.class);
+        cityList = LitePal.where("provinceid=?",String.valueOf(selectedProvince.getId())).find(City.class);
         if (cityList.size()>0){
             dataList.clear();
             for (City city:cityList
@@ -158,7 +159,7 @@ public class ChooseAreaFragment extends Fragment {
     private void queryCounties(){
            titleText.setText(selectedCity.getCityName());
            backButton.setVisibility(View.VISIBLE);
-           countyList = DataSupport.where("cityid=?",String.valueOf(selectedCity.getId())).find(County.class);
+           countyList = LitePal.where("cityid=?",String.valueOf(selectedCity.getId())).find(County.class);
                 if (countyList.size()>0){
                     dataList.clear();
                     for (County county: countyList
